@@ -512,7 +512,7 @@ const plane = new THREE.Plane(); // Plane for intersection
 
 const outMin = 60;
 
-const outMax = 190;
+const outMax = 150;
 
 const inMin = 130;
 
