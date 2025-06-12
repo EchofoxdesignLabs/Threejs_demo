@@ -458,7 +458,7 @@ loader.load(
 
     model.position.set(50, 17, 0);
 
-    model.scale.set(7, 7, 7);
+    model.scale.set(6.7, 6.7,6.7);
 
 
 
