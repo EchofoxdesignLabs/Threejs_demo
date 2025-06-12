@@ -345,9 +345,9 @@ scene.add(fill);
 
 
 
-const dirLightHelper = new THREE.DirectionalLightHelper(dirLight, 100, 0x00ff00); // Green
+// const dirLightHelper = new THREE.DirectionalLightHelper(dirLight, 100, 0x00ff00); // Green
 
-scene.add(dirLightHelper);
+// scene.add(dirLightHelper);
 
 
 
@@ -381,11 +381,11 @@ controls.target.set(0, 24.65, 0);
 
 // After you confirm the view, uncomment the three lines below.
 
-// controls.enableZoom = false;
+controls.enableZoom = false;
 
-// controls.enableRotate = false;
+controls.enableRotate = false;
 
-// controls.enablePan = false;
+controls.enablePan = false;
 
 
 
@@ -431,7 +431,7 @@ const whiteMaterial = new THREE.MeshStandardMaterial({
 
 loader.load(
 
-  'Assets/models/fox20.glb',
+  'Assets/models/fox23.glb',
 
   (gltf) => {
 
