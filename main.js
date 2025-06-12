@@ -1,22 +1,35 @@
 // src/main.js
 
-import * as THREE from 'three';
+// import * as THREE from 'three';
 
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import { AnaglyphEffect } from 'three/examples/jsm/effects/AnaglyphEffect.js';
+// import { AnaglyphEffect } from 'three/examples/jsm/effects/AnaglyphEffect.js';
 
 
 
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
-import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
-import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass.js';
+// import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+// import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+// import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+// import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+// import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
+// import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
+// import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass.js';
+import * as THREE from 'https://unpkg.com/three@0.152.0/build/three.module.js';
+
+import { OrbitControls } from 'https://unpkg.com/three@0.152.0/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader }   from 'https://unpkg.com/three@0.152.0/examples/jsm/loaders/GLTFLoader.js';
+import { AnaglyphEffect } from 'https://unpkg.com/three@0.152.0/examples/jsm/effects/AnaglyphEffect.js';
+
+import { EffectComposer } from 'https://unpkg.com/three@0.152.0/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass }     from 'https://unpkg.com/three@0.152.0/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass }     from 'https://unpkg.com/three@0.152.0/examples/jsm/postprocessing/ShaderPass.js';
+import { UnrealBloomPass } from 'https://unpkg.com/three@0.152.0/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { BokehPass }      from 'https://unpkg.com/three@0.152.0/examples/jsm/postprocessing/BokehPass.js';
+import { SSAOPass }       from 'https://unpkg.com/three@0.152.0/examples/jsm/postprocessing/SSAOPass.js';
+import { FilmPass }       from 'https://unpkg.com/three@0.152.0/examples/jsm/postprocessing/FilmPass.js';
 
 
 
