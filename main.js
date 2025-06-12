@@ -249,17 +249,19 @@ composer.addPass(anaglyphPass);
 
 // Point Light 1
 
-const pointLight1 = new THREE.PointLight(0x959595, 3, 240);
+const spotLight1 = new THREE.SpotLight(0x959595, 2, 240);
 
-pointLight1.position.set(50, 40, 20);
+spotLight1.position.set(0, 60, 20);
 
-pointLight1.decay = 0.1;
+spotLight1.decay = 0.1;
 
-pointLight1.castShadow = false;
+spotLight1.castShadow = false;
 
-scene.add(pointLight1);
+scene.add(spotLight1);
+scene.add(spotLight1.target); // Add target for the spotlight
+spotLight1.target.position.set(30, 60, 20); // Adjust target position as needed
 
-// const pointLight1Helper = new THREE.PointLightHelper(pointLight1, 20, 0xff0000); // Red
+// const pointLight1Helper = new THREE.SpotLightHelper(spotLight1, 20, 0xff0000); // Red
 
 // scene.add(pointLight1Helper);
 
