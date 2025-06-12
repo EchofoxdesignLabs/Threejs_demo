@@ -15,7 +15,8 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
-import { SAOPass } from 'three/addons/postprocessing/SAOPass.js';
+import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
+import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass.js';
 
 
 
@@ -65,7 +66,7 @@ import { SAOPass } from 'three/addons/postprocessing/SAOPass.js';
 
 const scene = new THREE.Scene();
 
-scene.background = new THREE.Color(0xffffff); // White background
+scene.background = new THREE.Color(0xfafafa); // White background
 
 
 
@@ -123,7 +124,7 @@ renderer.useLegacyLights = false;
 
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-renderer.shadowMap.enabled = true;
+renderer.shadowMap.enabled = false;
 
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -142,25 +143,25 @@ composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 
 // Add SAOPass for Ambient Occlusion - THIS CREATES THE SOFT CONTACT SHADOWS
-// const saoPass = new SAOPass( scene, camera, false, true );
-// saoPass.params.saoBias = 0.1;
-// saoPass.params.saoIntensity = 0.02;
-// saoPass.params.saoScale = 1;
-// saoPass.params.saoKernelRadius = 100;
-// saoPass.params.saoBlur = false;
-// composer.addPass(saoPass);
+// const ssao = new SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
+// ssao.kernelRadius = 0.1;        // how far to sample
+// ssao.minDistance = 0.005;      
+// ssao.maxDistance = 1;        
+// composer.addPass(ssao);
 
 // Add Bloom Pass
-const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.005, 0.5, 1);
-composer.addPass(bloomPass);
+// const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.08, 1, 1);
+// composer.addPass(bloomPass);
 
 // Add Bokeh (Depth of Field) Pass
 bokehPass = new BokehPass(scene, camera, {
-  focus: 0.5,      // Will be updated once model is loaded
+  focus: 50,      // Will be updated once model is loaded
   aperture: 0.005, // Lower value for subtle blur, increase for more
-  maxblur: 0.005,  // Maximum blur amount
+  maxblur: 0.001,  // Maximum blur amount
 });
 composer.addPass(bokehPass);
+const film = new FilmPass(0.02, 0, 0, false);
+composer.addPass(film);
 
 // Add custom Anaglyph Pass - CORRECTED IMPLEMENTATION
 // This shader is now self-contained and does not rely on the removed AnaglyphShader.js
@@ -188,6 +189,36 @@ const CustomAnaglyphShader = {
         }
     `
 };
+
+// 1) Define the overlay pass
+const WhiteOverlayPass = new ShaderPass({
+  uniforms: {
+    tDiffuse: { value: null },        // the input render
+    opacity:  { value: 0.5 },          // 50% white
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform sampler2D tDiffuse;
+    uniform float opacity;
+    varying vec2 vUv;
+    void main() {
+      vec4 color = texture2D(tDiffuse, vUv);
+      // mix(color, white, opacity)
+      gl_FragColor = vec4(
+        mix(color.rgb, vec3(1.0), opacity),
+        color.a
+      );
+    }
+  `
+});
+// 2) Add it at the very end of your composer
+composer.addPass(WhiteOverlayPass);
 
 
 
@@ -218,13 +249,13 @@ composer.addPass(anaglyphPass);
 
 // Point Light 1
 
-const pointLight1 = new THREE.PointLight(0x959595, 2, 240);
+const pointLight1 = new THREE.PointLight(0x959595, 3, 240);
 
-pointLight1.position.set(-38.7, 82.93, -45.9);
+pointLight1.position.set(50, 40, 20);
 
-pointLight1.decay = 2;
+pointLight1.decay = 0.1;
 
-pointLight1.castShadow = true;
+pointLight1.castShadow = false;
 
 scene.add(pointLight1);
 
@@ -236,31 +267,32 @@ scene.add(pointLight1);
 
 // Point Light 2
 
-const pointLight2 = new THREE.PointLight(0xffffff, 2, 1179);
+const spotLight2 = new THREE.SpotLight(0xffffff, 1, 240);
 
-pointLight2.position.set(58.6, 10, -19.0);
+spotLight2.position.set(50, -10, 80);
 
-pointLight2.decay = 2;
+spotLight2.decay = 0.1;
+spotLight2.castShadow = false;
 
-pointLight2.castShadow = true;
+scene.add(spotLight2);
+scene.add(spotLight2.target); // Add target for the spotlight
+spotLight2.target.position.set(30, 60, 20); // Adjust target position as needed
 
-scene.add(pointLight2);
+// const spotLight2Helper = new THREE.SpotLightHelper(spotLight2, 20, 0x0000ff); // Blue
 
-// const pointLight2Helper = new THREE.PointLightHelper(pointLight2, 20, 0x0000ff); // Blue
-
-// scene.add(pointLight2Helper);
+// scene.add(spotLight2Helper);
 
 
 
 // // Directional Light (updated position and rotation from screenshot)
 
-const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+const dirLight = new THREE.DirectionalLight(0xffffff, 1);
 
-dirLight.position.set(100, 200, 200.1);
+dirLight.position.set(100,140,40);
 
 
 
-dirLight.castShadow = true; // Enable shadows for this light
+dirLight.castShadow = false; // Enable shadows for this light
 
 dirLight.shadow.mapSize.width = 4096; // Increased resolution for crisper shadows
 
@@ -270,7 +302,7 @@ dirLight.shadow.mapSize.height = 4096;
 
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-dirLight.shadow.radius = 10;
+dirLight.shadow.radius = 20;
 
 dirLight.shadow.camera.near = 0.5;
 
@@ -296,7 +328,8 @@ scene.add(dirLight);
 
 scene.add(dirLight.target);
 
-dirLight.target.position.set(40, 18, 0);
+dirLight.target.position.set(50, 60, 20);
+//dirLight.target.rotation.set(90, 0, 0); // Ensure the target is looking at the model
 
 
 
@@ -310,9 +343,9 @@ scene.add(fill);
 
 
 
-// const dirLightHelper = new THREE.DirectionalLightHelper(dirLight, 100, 0x00ff00); // Green
+const dirLightHelper = new THREE.DirectionalLightHelper(dirLight, 100, 0x00ff00); // Green
 
-// scene.add(dirLightHelper);
+scene.add(dirLightHelper);
 
 
 
@@ -322,7 +355,7 @@ scene.add(fill);
 
 // Optional: Slight ambient to fill shadows softly
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 2.4);
+const ambientLight = new THREE.AmbientLight(0xffffff, 2.2);
 
 scene.add(ambientLight);
 
@@ -346,11 +379,11 @@ controls.target.set(0, 24.65, 0);
 
 // After you confirm the view, uncomment the three lines below.
 
-controls.enableZoom = false;
+// controls.enableZoom = false;
 
-controls.enableRotate = false;
+// controls.enableRotate = false;
 
-controls.enablePan = false;
+// controls.enablePan = false;
 
 
 
@@ -358,7 +391,7 @@ controls.enablePan = false;
 
 const rawTarget = new THREE.Vector3(); // the instant intersection point
 
-const smoothTarget = new THREE.Vector3(60, 70, 91); // the filtered version
+const smoothTarget = new THREE.Vector3(60, 120, 91); // the filtered version
 
 const SMOOTH_FACTOR = 0.02;
 
@@ -386,9 +419,9 @@ const whiteMaterial = new THREE.MeshStandardMaterial({
 
   color: 0xffffff,
 
-  metalness: 0.1,
+  metalness: 0,
 
-  roughness: 0.7,
+  roughness: 1,
 
 });
 
@@ -396,7 +429,7 @@ const whiteMaterial = new THREE.MeshStandardMaterial({
 
 loader.load(
 
-  'Assets/models/fox17.glb',
+  'Assets/models/fox20.glb',
 
   (gltf) => {
 
@@ -407,10 +440,11 @@ loader.load(
       if (child.isMesh) {
 
         child.material = whiteMaterial;
+        //child.material.wireframe = true;
 
         child.castShadow = false;
 
-        child.receiveShadow = true;
+        child.receiveShadow = false;
 
       }
 
@@ -420,9 +454,9 @@ loader.load(
 
     // Set model position and scale from your Spline screenshot
 
-    model.position.set(40, 18, 0);
+    model.position.set(50, 17, 0);
 
-    model.scale.set(8.02, 8.02, 8.02);
+    model.scale.set(7, 7, 7);
 
 
 
@@ -500,7 +534,7 @@ const target = new THREE.Object3D();
 
 rawTarget.x = 60; // Initial position for the target
 
-rawTarget.y = 70; // Initial position for the target
+rawTarget.y = 110; // Initial position for the target
 
 rawTarget.z = 91; // Initial position for the target
 
@@ -512,7 +546,7 @@ const plane = new THREE.Plane(); // Plane for intersection
 
 const outMin = 60;
 
-const outMax = 150;
+const outMax = 80;
 
 const inMin = 130;
 
@@ -522,9 +556,9 @@ const inMinY = 35;
 
 const inMaxY = 58;
 
-const outMinY = 28;
+const outMinY = 60;
 
-const outMaxY = 75;
+const outMaxY = 110;
 
 
 
@@ -684,6 +718,7 @@ function animate() {
     const targetIntensity = isHovered ? 1.5 : 0.0;
     const currentIntensity = anaglyphPass.uniforms.intensity.value;
     anaglyphPass.uniforms.intensity.value += (targetIntensity - currentIntensity) * 0.1; // 0.1 is the smoothing factor
+    WhiteOverlayPass.uniforms.opacity.value = 0.2;  // 50% white
 
   // if (useEffect) {
 
