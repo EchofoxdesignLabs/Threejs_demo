@@ -27,7 +27,7 @@ import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass.js';
 
 
 
-//--- Helper Button for Camera Positioning ---
+
 
 // const logButton = document.createElement('button');
 
